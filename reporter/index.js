@@ -4,6 +4,7 @@ const fs = require("fs-extra");
 const yaml = require("js-yaml");
 const path = require("path");
 const pug = require("pug");
+const puppeteer = require('puppeteer');
 
 const groupBy = require("lodash/groupBy");
 const flatten = require("lodash/flatten");
@@ -71,6 +72,17 @@ function reporter(args) {
       console.log(html_dump);
     }
   };
+
+  c.savePDF = async function () {
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+
+    await page.goto("file://" +c.args.output+"/inspection.html", {waitUntil: 'networkidle0'});
+
+    const pdf = await page.pdf({ format: 'A4', path: c.args.output + '/report.pdf' });
+
+    await browser.close();
+  }
 
   c.saveSource = function (source, filename = "source.html") {
     if (c.args.output) {
